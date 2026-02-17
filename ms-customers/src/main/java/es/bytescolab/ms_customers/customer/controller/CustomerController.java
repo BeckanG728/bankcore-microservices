@@ -1,4 +1,4 @@
-package es.bytescolab.ms_customers.controller;
+package es.bytescolab.ms_customers.customer.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

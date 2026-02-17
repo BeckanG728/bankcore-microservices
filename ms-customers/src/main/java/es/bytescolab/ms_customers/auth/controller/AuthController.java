@@ -1,4 +1,4 @@
-package es.bytescolab.ms_customers.controller;
+package es.bytescolab.ms_customers.auth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
