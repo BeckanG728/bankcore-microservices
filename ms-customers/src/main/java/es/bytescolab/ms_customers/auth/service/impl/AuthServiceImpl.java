@@ -12,6 +12,7 @@ import es.bytescolab.ms_customers.auth.service.JwtService;
 import es.bytescolab.ms_customers.customer.dto.RegisteredCustomer;
 import es.bytescolab.ms_customers.customer.entity.Customer;
 import es.bytescolab.ms_customers.customer.repository.CustomerRepository;
+import es.bytescolab.ms_customers.utils.exception.InvalidCredentialsException; // Añadir import
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,8 @@ public class AuthServiceImpl implements AuthService {
 
         RegisteredCustomer customerDto = customerMapper.toRegisteredCustomer(savedCustomer);
 
-        TokenResponse tokenResponse = jwtService.generateToken(user.getId());
+        // Modificado para incluir customerId y UserRole
+        TokenResponse tokenResponse = jwtService.generateToken(user.getId(), user.getEmail(), user.getCustomerId(), user.getRole());
 
         return TokenResponse.builder()
                 .accessToken(tokenResponse.accessToken())
@@ -63,10 +65,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public TokenResponse login(LoginRequest request) {
         UserEntity user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> new InvalidCredentialsException("Usuario no encontrado")); // Cambiado
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new IllegalArgumentException("Contraseña inválida");
+            throw new InvalidCredentialsException("Contraseña inválida"); // Cambiado
         }
 
         Customer customer = customerRepository.findById(user.getCustomerId())
@@ -74,7 +76,8 @@ public class AuthServiceImpl implements AuthService {
 
         RegisteredCustomer customerDto = customerMapper.toRegisteredCustomer(customer);
 
-        TokenResponse tokenResponse = jwtService.generateToken(user.getId());
+        // Modificado para incluir customerId y UserRole
+        TokenResponse tokenResponse = jwtService.generateToken(user.getId(), user.getEmail(), user.getCustomerId(), user.getRole());
 
         return TokenResponse.builder()
                 .accessToken(tokenResponse.accessToken())

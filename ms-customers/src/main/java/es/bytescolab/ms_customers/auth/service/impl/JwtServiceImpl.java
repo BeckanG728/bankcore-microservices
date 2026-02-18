@@ -1,6 +1,7 @@
 package es.bytescolab.ms_customers.auth.service.impl;
 
 import es.bytescolab.ms_customers.auth.common.dto.response.TokenResponse;
+import es.bytescolab.ms_customers.auth.common.model.enums.UserRole; // Añadir import
 import es.bytescolab.ms_customers.auth.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    @Value("${jwt.secret:mySecretKeyForJWTGenerationWithMinimumLength}")
+    @Value("${jwt.secret:mySecretKeyForJWTGenerationWithMinimumLengthAndStrongRandomCharacters}")
     private String secretKey;
 
     @Value("${jwt.expiration:3600000}")
@@ -31,9 +32,12 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public TokenResponse generateToken(UUID userId) {
+    public TokenResponse generateToken(UUID userId, String userEmail, UUID customerId, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId.toString());
+        claims.put("userEmail", userEmail);
+        claims.put("customerId", customerId.toString()); // Añadir customerId
+        claims.put("role", role.name()); // Añadir role
 
         String accessToken = Jwts.builder()
                 .claims(claims)
@@ -68,5 +72,23 @@ public class JwtServiceImpl implements JwtService {
     public UUID extractUserId(String token) {
         Claims claims = getClaims(token);
         return UUID.fromString(claims.getSubject());
+    }
+
+    @Override
+    public String extractUserEmail(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("userEmail", String.class);
+    }
+
+    @Override
+    public UUID extractCustomerId(String token) {
+        Claims claims = getClaims(token);
+        return UUID.fromString(claims.get("customerId", String.class));
+    }
+
+    @Override
+    public UserRole extractUserRole(String token) {
+        Claims claims = getClaims(token);
+        return UserRole.valueOf(claims.get("role", String.class));
     }
 }
