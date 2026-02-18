@@ -1,0 +1,13 @@
+package es.bytescolab.ms_customers.auth.common.dto.response;
+
+import lombok.Builder;
+import java.time.LocalDateTime;
+
+@Builder
+public record ErrorResponse(
+        LocalDateTime timestamp,
+        int status,
+        String error,
+        String message,
+        String path
+) {}
