@@ -1,6 +1,6 @@
 package es.bytescolab.ms_customers.auth.common.dto.response;
 
-import es.bytescolab.ms_customers.customer.dto.RegisteredCustomer;
+import es.bytescolab.ms_customers.customer.dto.request.RegisteredCustomer;
 import lombok.Builder;
 
 @Builder

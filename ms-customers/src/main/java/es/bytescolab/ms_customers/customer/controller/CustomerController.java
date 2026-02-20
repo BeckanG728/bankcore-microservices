@@ -2,15 +2,15 @@ package es.bytescolab.ms_customers.customer.controller;
 
 import es.bytescolab.ms_customers.auth.common.model.entity.UserEntity;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerProfileResponse;
+import es.bytescolab.ms_customers.customer.dto.response.CustomerValidationResponse;
 import es.bytescolab.ms_customers.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/customer")
@@ -33,8 +33,9 @@ public class CustomerController {
     }
 
     @GetMapping("/{customerId}/validate")
-    public ResponseEntity<?> validateCustomer() {
-        return null;
+    public ResponseEntity<CustomerValidationResponse> validateCustomer(@PathVariable UUID customerId) {
+        CustomerValidationResponse response = customerService.validateCustomer(customerId);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/me")

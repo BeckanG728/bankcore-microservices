@@ -6,9 +6,9 @@ spring:
     name: ms-customers
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/customers_db
-    username: admin
-    password: admin123
+    url: jdbc:postgresql://localhost:5432/customers_db
+    username: postgres
+    password: diogenes
     driver-class-name: org.postgresql.Driver
 
   jpa:

@@ -9,7 +9,7 @@ import es.bytescolab.ms_customers.auth.common.model.entity.UserEntity;
 import es.bytescolab.ms_customers.auth.repository.UserRepository;
 import es.bytescolab.ms_customers.auth.service.AuthService;
 import es.bytescolab.ms_customers.auth.service.JwtService;
-import es.bytescolab.ms_customers.customer.dto.RegisteredCustomer;
+import es.bytescolab.ms_customers.customer.dto.request.RegisteredCustomer;
 import es.bytescolab.ms_customers.customer.entity.Customer;
 import es.bytescolab.ms_customers.customer.repository.CustomerRepository;
 import es.bytescolab.ms_customers.utils.exception.InvalidCredentialsException; // Añadir import
