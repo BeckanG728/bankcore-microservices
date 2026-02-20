@@ -1,0 +1,30 @@
+package es.bytescolab.ms_customers.customer.service.impl;
+
+import es.bytescolab.ms_customers.customer.dto.response.CustomerProfileResponse;
+import es.bytescolab.ms_customers.customer.mapper.CustomerProfileMapper;
+import es.bytescolab.ms_customers.customer.repository.CustomerRepository;
+import es.bytescolab.ms_customers.customer.service.CustomerService;
+import es.bytescolab.ms_customers.utils.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class CustomerServiceImpl implements CustomerService {
+
+    private final CustomerRepository customerRepository;
+    private final CustomerProfileMapper customerProfileMapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public CustomerProfileResponse getMyProfile(UUID customerId) {
+        return customerRepository.findById(customerId)
+                .map(customerProfileMapper::toCustomerProfileResponse)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Cliente no encontrado con id: " + customerId
+                ));
+    }
+}
