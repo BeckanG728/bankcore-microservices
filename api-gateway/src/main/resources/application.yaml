@@ -1,3 +1,44 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true  # Habilitar descubrimiento automático por Eureka
+          lower-case-service-id: true
+      default-filters:
+        - DedupeResponseHeader=Vary X-Application-Context, RETAIN_FIRST
+      routes:
+        # Ruta para ms-customers
+        - id: ms-customers
+          uri: lb://ms-customers  # lb = load balancer via Eureka
+          predicates:
+            - Path=/api/customers/**, /api/auth/**, /api/customer/**
+
+        # Ruta para ms-accounts
+        - id: ms-accounts
+          uri: lb://ms-accounts
+          predicates:
+            - Path=/api/accounts/**, /api/transfers/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true  # Usar IP del contenedor
+    hostname: ${HOSTNAME:api-gateway}
+
+jwt:
+  secret: ${JWT_SECRET:mySecretKeyForJWTGenerationWithMinimumLengthAndStrongRandomCharacters}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG

@@ -1,4 +1,4 @@
-package es.bytescolab.ms_customers.customer.dto;
+package es.bytescolab.ms_customers.customer.dto.request;
 
 import es.bytescolab.ms_customers.customer.enums.CustomerStatus;
 import lombok.AllArgsConstructor;
