@@ -6,9 +6,9 @@ spring:
     name: ms-customers
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/customers_db
-    username: postgres
-    password: diogenes
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/customers_db}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:admin123}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -32,3 +32,14 @@ logging:
     root: INFO
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: ${HOSTNAME:ms-customers}
