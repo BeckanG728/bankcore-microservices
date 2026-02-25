@@ -2,6 +2,7 @@ package es.bytescolab.ms_customers.customer.controller;
 
 import es.bytescolab.ms_customers.auth.common.model.entity.UserEntity;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerProfileResponse;
+import es.bytescolab.ms_customers.customer.dto.response.CustomerSummaryResponse;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerValidationResponse;
 import es.bytescolab.ms_customers.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,9 @@ public class CustomerController {
 
 
     @GetMapping("/{customerId}")
-    public ResponseEntity<?> getCustomer() {
-        return null;
+    public ResponseEntity<CustomerSummaryResponse> getCustomer(@PathVariable UUID customerId) {
+        CustomerSummaryResponse summary = customerService.getCustomerById(customerId);
+        return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/{customerId}/validate")
