@@ -1,10 +1,12 @@
 package es.bytescolab.ms_customers.customer.controller;
 
 import es.bytescolab.ms_customers.auth.common.model.entity.UserEntity;
+import es.bytescolab.ms_customers.customer.dto.request.UpdateProfileRequest;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerProfileResponse;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerSummaryResponse;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerValidationResponse;
 import es.bytescolab.ms_customers.customer.service.CustomerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,7 +43,11 @@ public class CustomerController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<?> editProfile() {
-        return null;
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<?> editProfile(@AuthenticationPrincipal UserEntity currentUser,
+                                         @Valid @RequestBody UpdateProfileRequest request) {
+        CustomerProfileResponse updated = customerService.updateProfile(
+                currentUser.getCustomerId(), request);
+        return ResponseEntity.ok(updated);
     }
 }
