@@ -35,8 +35,10 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findById(customerId)
                 .map(customer -> {
                     boolean isActive = customer.getStatus().name().equals("ACTIVE");
-                    return new CustomerValidationResponse(true, isActive);
+                    return new CustomerValidationResponse(customer.getId(), true, isActive);
                 })
-                .orElse(new CustomerValidationResponse(false, false));
+                .orElse(new CustomerValidationResponse(customerId, false, false));
     }
+
+    
 }
