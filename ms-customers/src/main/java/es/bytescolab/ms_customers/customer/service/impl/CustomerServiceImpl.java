@@ -1,6 +1,7 @@
 package es.bytescolab.ms_customers.customer.service.impl;
 
 import es.bytescolab.ms_customers.customer.dto.response.CustomerProfileResponse;
+import es.bytescolab.ms_customers.customer.dto.response.CustomerSummaryResponse;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerValidationResponse;
 import es.bytescolab.ms_customers.customer.mapper.CustomerProfileMapper;
 import es.bytescolab.ms_customers.customer.repository.CustomerRepository;
@@ -40,5 +41,22 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElse(new CustomerValidationResponse(customerId, false, false));
     }
 
-    
+    @Override
+    @Transactional(readOnly = true)
+    public CustomerSummaryResponse getCustomerById(UUID customerId) {
+        return customerRepository.findById(customerId)
+                .map(customer -> CustomerSummaryResponse.builder()
+                        .id(customer.getId())
+                        .dni(customer.getDni())
+                        .fullName(customer.getFirstName() + " " + customer.getLastName())
+                        .email(customer.getEmail())
+                        .status(customer.getStatus())
+                        .build()
+                )
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe un cliente con el ID proporcionado"
+                ));
+    }
+
+
 }
