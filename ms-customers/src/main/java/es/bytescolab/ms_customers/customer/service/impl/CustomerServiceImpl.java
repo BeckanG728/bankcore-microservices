@@ -1,7 +1,10 @@
 package es.bytescolab.ms_customers.customer.service.impl;
 
+import es.bytescolab.ms_customers.customer.dto.request.UpdateProfileRequest;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerProfileResponse;
+import es.bytescolab.ms_customers.customer.dto.response.CustomerSummaryResponse;
 import es.bytescolab.ms_customers.customer.dto.response.CustomerValidationResponse;
+import es.bytescolab.ms_customers.customer.entity.Customer;
 import es.bytescolab.ms_customers.customer.mapper.CustomerProfileMapper;
 import es.bytescolab.ms_customers.customer.repository.CustomerRepository;
 import es.bytescolab.ms_customers.customer.service.CustomerService;
@@ -40,5 +43,41 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElse(new CustomerValidationResponse(customerId, false, false));
     }
 
-    
+    @Override
+    @Transactional(readOnly = true)
+    public CustomerSummaryResponse getCustomerById(UUID customerId) {
+        return customerRepository.findById(customerId)
+                .map(customer -> CustomerSummaryResponse.builder()
+                        .id(customer.getId())
+                        .dni(customer.getDni())
+                        .fullName(customer.getFirstName() + " " + customer.getLastName())
+                        .email(customer.getEmail())
+                        .status(customer.getStatus())
+                        .build()
+                )
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe un cliente con el ID proporcionado"
+                ));
+    }
+
+    @Override
+    @Transactional
+    public CustomerProfileResponse updateProfile(UUID customerId, UpdateProfileRequest request) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Cliente no encontrado con id: " + customerId
+                ));
+
+        // Solo se actualiza firstName, lastName, phone, address
+        // DNI y email nunca se modifican
+        customer.setFirstName(request.firstName());
+        customer.setLastName(request.lastName());
+        customer.setPhone(request.phone());
+        customer.setAddress(request.address());
+
+        Customer updated = customerRepository.save(customer);
+        return customerProfileMapper.toCustomerProfileResponse(updated);
+    }
+
+
 }
