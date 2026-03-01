@@ -2,7 +2,6 @@ package com.bankcore.api_gateway.service;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -19,22 +18,22 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     private final RouterValidator validator;
     private final JwtUtils jwtUtils;
 
-    public AuthenticationFilter(RouterValidator validator, JwtUtils jwtUtils){
+    public AuthenticationFilter(RouterValidator validator, JwtUtils jwtUtils) {
         super(Config.class);
         this.validator = validator;
         this.jwtUtils = jwtUtils;
     }
 
     @Override
-    public GatewayFilter apply(Config config){
+    public GatewayFilter apply(Config config) {
         return ((exchange, chain) -> {
-            ServerHttpRequest request =  exchange.getRequest();
+            ServerHttpRequest request = exchange.getRequest();
 
-            if(validator.isSecured.test(request)){
+            if (validator.isSecured.test(request)) {
                 // Detailed logging for secured routes
                 System.out.println("Secured route accessed: " + request.getPath());
 
-                if (authMissing(request)){
+                if (authMissing(request)) {
                     System.err.println("Authorization header missing");
                     return onError(exchange, HttpStatus.UNAUTHORIZED);
                 }
@@ -43,7 +42,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     String authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
                     System.out.println("Full Authorization Header: " + authHeader);
 
-                    if(!authHeader.startsWith("Bearer ")){
+                    if (!authHeader.startsWith("Bearer ")) {
                         System.err.println("Invalid Authorization header format");
                         return onError(exchange, HttpStatus.UNAUTHORIZED);
                     }
@@ -52,24 +51,40 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     System.out.println("Extracted Token: " + token);
 
                     // Validate token
-                    if (jwtUtils.isExpired(token)){
+                    if (jwtUtils.isExpired(token)) {
                         System.err.println("Token has expired");
                         return onError(exchange, HttpStatus.UNAUTHORIZED);
                     }
 
-                    // Extract and validate userId
-                    Optional<String> userIdOptional = jwtUtils.extractUserId(token);
-                    if(userIdOptional.isEmpty()){
-                        System.err.println("Unable to extract userId from token");
+                    // Extraer y validar para que ms-accounts pueda crear la cluenta del cliente
+                    Optional<String> customerIdOptional = jwtUtils.extractCustomerId(token);
+                    if (customerIdOptional.isEmpty()) {
+                        System.err.println("[Gateway] Unable to extract customerId from token");
                         return onError(exchange, HttpStatus.FORBIDDEN);
                     }
 
-                    String userId = userIdOptional.get();
-                    System.out.println("Extracted UserId: " + userId);
-                    // Mutate request with userId
+                    String customerId = customerIdOptional.get();
+                    System.out.println("[Gateway] Extracted customerId:: " + customerId);
+
+                    // Inyectamos el customerId como X-User-Id
+                    // ms-accounts leerá este header para saber a qué cliente pertenece la cuenta
                     ServerHttpRequest mutatedRequest = request.mutate()
-                            .header("X-User-Id", userId)
+                            .header("X-User-Id", customerId)
                             .build();
+
+                    // Extract and validate userId
+//                    Optional<String> userIdOptional = jwtUtils.extractUserId(token);
+//                    if (userIdOptional.isEmpty()) {
+//                        System.err.println("Unable to extract userId from token");
+//                        return onError(exchange, HttpStatus.FORBIDDEN);
+//                    }
+
+//                    String userId = userIdOptional.get();
+//                    System.out.println("Extracted UserId: " + userId);
+                    // Mutate request with userId
+//                    ServerHttpRequest mutatedRequest = request.mutate()
+//                            .header("X-User-Id", userId)
+//                            .build();
 
                     return chain.filter(exchange.mutate().request(mutatedRequest).build());
 
@@ -84,16 +99,17 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         });
     }
 
-    private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus){
+    private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
         ServerHttpResponse response = (ServerHttpResponse) exchange.getResponse();
         response.setStatusCode(httpStatus);
-        return  response.setComplete();
+        return response.setComplete();
     }
 
-    private boolean authMissing(ServerHttpRequest request){
+    private boolean authMissing(ServerHttpRequest request) {
         return !request.getHeaders().containsKey("Authorization");
     }
 
-    public static class  Config{}
+    public static class Config {
+    }
 
 }
