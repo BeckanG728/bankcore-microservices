@@ -1,4 +1,4 @@
-package es.bytescolab.ms_customers.customer.dto.response;
+package es.bytescolab.ms_accounts.feign.dto;
 
 import java.util.UUID;
 

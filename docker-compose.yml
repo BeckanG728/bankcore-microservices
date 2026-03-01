@@ -17,6 +17,8 @@ services:
       POSTGRES_PASSWORD: admin123
     ports:
       - "5433:5432"
+    volumes:
+      - customers_data:/var/lib/postgresql/data
 
   postgres-accounts:
     image: postgres:15
@@ -26,6 +28,8 @@ services:
       POSTGRES_PASSWORD: admin123
     ports:
       - "5434:5432"
+    volumes:
+      - accounts_data:/var/lib/postgresql/data
 
   ms-customers:
     build: ./ms-customers
@@ -69,3 +73,6 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_APPLICATION_NAME: api-gateway
       JWT_SECRET: mySecretKeyForJWTGenerationWithMinimumLengthAndStrongRandomCharacters
+volumes:
+  customers_data:
+  accounts_data:
