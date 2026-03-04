@@ -15,13 +15,13 @@ import java.util.Optional;
 public class JwtUtils {
 
     @Value("${jwt.secret}")
-    private  String secretKey;
+    private String secretKey;
 
-    private SecretKey getSigninKey(){
+    private SecretKey getSigninKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public Claims getClaims(String token){
+    public Claims getClaims(String token) {
         try {
             return Jwts.parser()
                     .verifyWith(getSigninKey())
@@ -33,6 +33,21 @@ public class JwtUtils {
             throw new IllegalArgumentException("Error validando token JWT: " + e.getMessage(), e);
         }
     }
+
+    public Optional<String> extractCustomerId(String token) {
+        try {
+            Claims claims = getClaims(token);
+            Object customerIdClaim = claims.get("customerId");
+            if (customerIdClaim != null) {
+                return Optional.of(customerIdClaim.toString());
+            }
+            return Optional.empty();
+        } catch (Exception e) {
+            System.err.println("Error extrayendo customerId: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     public Optional<String> extractUserId(String token) {
         try {
             Claims claims = getClaims(token);
@@ -48,10 +63,10 @@ public class JwtUtils {
         }
     }
 
-    public boolean isExpired(String token){
-        try{
+    public boolean isExpired(String token) {
+        try {
             return getClaims(token).getExpiration().before(new Date());
-        }catch(Exception e){
+        } catch (Exception e) {
             return true;
         }
     }

@@ -17,13 +17,17 @@ spring:
         - id: ms-customers
           uri: lb://ms-customers  # lb = load balancer via Eureka
           predicates:
-            - Path=/api/customers/**, /api/auth/**, /api/customer/**
+            - Path=/api/customers/**, /api/auth/**
+          filters:
+            - AuthenticationFilter
 
         # Ruta para ms-accounts
         - id: ms-accounts
           uri: lb://ms-accounts
           predicates:
             - Path=/api/accounts/**, /api/transfers/**
+          filters:
+            - AuthenticationFilter
 
 eureka:
   client:
