@@ -47,6 +47,7 @@ public class Account {
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(precision = 10, scale = 2)
+    @Builder.Default
     private BigDecimal dailyWithdrawalLimit = new BigDecimal("1000.00");
 
     @Column(nullable = false, updatable = false)

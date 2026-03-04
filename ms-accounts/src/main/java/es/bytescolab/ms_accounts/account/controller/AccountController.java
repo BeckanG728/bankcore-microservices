@@ -40,4 +40,14 @@ public class AccountController {
         List<AccountSummaryResponse> response = accountService.getAccountsByCustomerId(customerId);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountResponse> getAccountById(
+            @RequestHeader("X-User-Id") UUID customerId,
+            @PathVariable UUID id
+    ) {
+        log.info("GET /api/accounts/{} — customerId: {}", id, customerId);
+        AccountResponse response = accountService.getAccountById(id, customerId);
+        return ResponseEntity.ok(response);
+    }
 }

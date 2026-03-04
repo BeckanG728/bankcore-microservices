@@ -10,6 +10,7 @@ import es.bytescolab.ms_accounts.account.repository.AccountRepository;
 import es.bytescolab.ms_accounts.account.services.AccountService;
 import es.bytescolab.ms_accounts.feign.CustomerFeignClient;
 import es.bytescolab.ms_accounts.feign.dto.CustomerValidationResponse;
+import es.bytescolab.ms_accounts.utils.exception.AccountNotFoundException;
 import es.bytescolab.ms_accounts.utils.exception.CustomerInactiveException;
 import es.bytescolab.ms_accounts.utils.exception.CustomerNotFoundException;
 import es.bytescolab.ms_accounts.utils.exception.MaxAccountsReachedException;
@@ -95,6 +96,17 @@ public class AccountServiceImpl implements AccountService {
         return accountMapper.toSummaryResponseList(listAccounts);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public AccountResponse getAccountById(UUID accountId, UUID customerId) {
+        log.info("Consultando detalle de cuenta: {} para cliente: {}", accountId, customerId);
+        Account account = accountRepository.findByIdAndCustomerId(accountId, customerId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "No se encontró la cuenta proporcionada para este cliente"
+                ));
+        return toResponse(account);
+    }
+
     private AccountResponse toResponse(Account account) {
         return AccountResponse.builder()
                 .id(account.getId())
@@ -105,7 +117,9 @@ public class AccountServiceImpl implements AccountService {
                 .balance(account.getBalance().setScale(2, java.math.RoundingMode.HALF_UP))
                 .alias(account.getAlias())
                 .status(account.getStatus())
+                .dailyWithdrawalLimit(account.getDailyWithdrawalLimit())
                 .createdAt(account.getCreatedAt())
+                .updatedAt(account.getUpdatedAt())
                 .build();
     }
 

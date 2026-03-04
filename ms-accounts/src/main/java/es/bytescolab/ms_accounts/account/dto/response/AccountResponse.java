@@ -18,6 +18,8 @@ public record AccountResponse(
         BigDecimal balance,
         String alias,
         AccountStatus status,
-        Instant createdAt
+        BigDecimal dailyWithdrawalLimit,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
