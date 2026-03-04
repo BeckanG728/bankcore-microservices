@@ -2,8 +2,10 @@ package es.bytescolab.ms_accounts.account.services.impl;
 
 import es.bytescolab.ms_accounts.account.dto.request.CreateAccountRequest;
 import es.bytescolab.ms_accounts.account.dto.response.AccountResponse;
+import es.bytescolab.ms_accounts.account.dto.response.AccountSummaryResponse;
 import es.bytescolab.ms_accounts.account.entity.Account;
 import es.bytescolab.ms_accounts.account.enums.AccountStatus;
+import es.bytescolab.ms_accounts.account.mapper.AccountMapper;
 import es.bytescolab.ms_accounts.account.repository.AccountRepository;
 import es.bytescolab.ms_accounts.account.services.AccountService;
 import es.bytescolab.ms_accounts.feign.CustomerFeignClient;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +31,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final CustomerFeignClient customerFeignClient;
+    private final AccountMapper accountMapper;
 
     @Override
     @Transactional
@@ -81,6 +85,14 @@ public class AccountServiceImpl implements AccountService {
         log.info("Cuenta creada con ID: {} para cliente: {}", savedAccount.getId(), customerId);
 
         return toResponse(savedAccount);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountSummaryResponse> getAccountsByCustomerId(UUID customerId) {
+        List<Account> listAccounts = accountRepository.findByCustomerId(customerId);
+        log.info("Encontradas {} cuentas para el cliente {}", listAccounts.size(), customerId);
+        return accountMapper.toSummaryResponseList(listAccounts);
     }
 
     private AccountResponse toResponse(Account account) {
