@@ -11,4 +11,6 @@ public interface AccountService {
     AccountResponse createAccount(UUID customerId, CreateAccountRequest request);
 
     List<AccountSummaryResponse> getAccountsByCustomerId(UUID customerId);
+
+    AccountResponse getAccountById(UUID accountId, UUID customerId);
 }

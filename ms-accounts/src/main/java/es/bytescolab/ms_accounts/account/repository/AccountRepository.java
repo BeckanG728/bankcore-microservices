@@ -5,6 +5,7 @@ import es.bytescolab.ms_accounts.account.enums.AccountStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AccountRepository extends JpaRepository<Account, UUID> {
@@ -12,6 +13,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     long countByCustomerIdAndStatusNot(UUID customerId, AccountStatus status);
 
     List<Account> findByCustomerId(UUID customerId);
+
+    Optional<Account> findByIdAndCustomerId(UUID id, UUID customerId);
 
     boolean existsByAccountNumber(String accountNumber);
 }
