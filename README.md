@@ -40,7 +40,7 @@ Sistema bancario distribuido con arquitectura de microservicios para gestionar c
 |----------|--------|-------------|
 | **api-gateway** | 8080 | Punto de entrada único y enrutamiento |
 | **ms-customers** | 8081 | Clientes, autenticación y JWT |
-| **ms-accounts** | 8082 | Cuentas y transferencias |
+| **ms-accounts** | 8082 | Cuentas, transacciones y depósitos |
 | **eureka-server** | 8761 | Service Discovery |
 
 ### Stack Tecnológico
@@ -213,6 +213,21 @@ docker-compose down        # Detener
 |--------|----------|---------|
 | GET | `/api/customer/me` | `Authorization: Bearer <token>` |
 | GET | `/api/customer/{id}/validate` | - |
+
+### Cuentas (requiere `X-User-Id`)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/accounts` | Crear cuenta |
+| GET | `/api/accounts` | Listar cuentas del cliente |
+| GET | `/api/accounts/{id}` | Obtener detalle de cuenta |
+
+### Transacciones/Depósitos (requiere `X-User-Id`)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/accounts/{accountId}/transactions/deposits` | Depositar dinero |
+| GET | `/api/accounts/{accountId}/transactions` | Listar transacciones |
 
 ---
 
