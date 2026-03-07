@@ -3,6 +3,7 @@ package es.bytescolab.ms_accounts.config;
 import es.bytescolab.ms_accounts.utils.exception.AccountNotFoundException;
 import es.bytescolab.ms_accounts.utils.exception.CustomerInactiveException;
 import es.bytescolab.ms_accounts.utils.exception.CustomerNotFoundException;
+import es.bytescolab.ms_accounts.utils.exception.InsufficientFundsException;
 import es.bytescolab.ms_accounts.utils.exception.MaxAccountsReachedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccountNotFound(
             AccountNotFoundException ex, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientFunds(
+            InsufficientFundsException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
