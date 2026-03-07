@@ -13,10 +13,15 @@ import es.bytescolab.ms_accounts.utils.exception.AccountNotFoundException;
 import es.bytescolab.ms_accounts.utils.exception.InsufficientFundsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -117,18 +122,52 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TransactionResponse> getTransactionsByAccountId(UUID accountId, UUID customerId) {
-        log.info("Consultando transacciones: cuenta={}, cliente={}", accountId, customerId);
+    public Page<TransactionResponse> getTransactionHistory(
+            UUID accountId,
+            UUID customerId,
+            Integer page,
+            Integer size,
+            Instant startDate,
+            Instant endDate,
+            String type
+    ) {
+        log.info("Consultando historial: cuenta={}, cliente={}, page={}, size={}, startDate={}, endDate={}, type={}", 
+                accountId, customerId, page, size, startDate, endDate, type);
 
-        // Validar ownership
+        // 1. Validar ownership
         Account account = accountRepository.findByIdAndCustomerId(accountId, customerId)
                 .orElseThrow(() -> new AccountNotFoundException(
                         "No se encontró la cuenta proporcionada para este cliente"
                 ));
 
-        List<Transaction> transactions = transactionRepository.findByAccountId(account.getId());
-        log.info("Encontradas {} transacciones para la cuenta {}", transactions.size(), accountId);
+        // 2. Configurar paginación (orden descendente por fecha)
+        Pageable pageable = PageRequest.of(
+                page != null ? page : 0, 
+                size != null ? size : 10,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
 
-        return transactionMapper.toResponseList(transactions);
+        // 3. Convertir tipo de String a TransactionType
+        TransactionType transactionType = null;
+        if (type != null && !type.isEmpty()) {
+            try {
+                transactionType = TransactionType.valueOf(type.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("Tipo de transacción inválido: {}", type);
+            }
+        }
+
+        // 4. Consultar con filtros
+        Page<Transaction> transactionsPage = transactionRepository.findByAccountIdWithFilters(
+                account.getId(), startDate, endDate, transactionType, pageable
+        );
+
+        log.info("Encontradas {} transacciones (página {} de {})", 
+                transactionsPage.getTotalElements(), 
+                transactionsPage.getNumber() + 1, 
+                transactionsPage.getTotalPages());
+
+        // 5. Mapear a Response
+        return transactionsPage.map(transactionMapper::toResponse);
     }
 }

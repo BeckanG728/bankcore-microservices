@@ -222,12 +222,21 @@ docker-compose down        # Detener
 | GET | `/api/accounts` | Listar cuentas del cliente |
 | GET | `/api/accounts/{id}` | Obtener detalle de cuenta |
 
-### Transacciones/Depósitos (requiere `X-User-Id`)
+### Transacciones (requiere `X-User-Id`)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | POST | `/api/accounts/{accountId}/transactions/deposits` | Depositar dinero |
-| GET | `/api/accounts/{accountId}/transactions` | Listar transacciones |
+| POST | `/api/accounts/{accountId}/transactions/withdrawals` | Retirar dinero |
+| GET | `/api/accounts/{accountId}/transactions` | Ver historial de transacciones (con paginación y filtros) |
+
+**Query params para historial:** `page`, `size`, `startDate`, `endDate`, `type`
+
+### Transferencias (requiere `X-User-Id`)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/transfers` | Transferir dinero entre cuentas |
 
 ---
 

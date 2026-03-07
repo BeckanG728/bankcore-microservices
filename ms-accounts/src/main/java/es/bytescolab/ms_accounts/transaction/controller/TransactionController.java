@@ -7,10 +7,13 @@ import es.bytescolab.ms_accounts.transaction.services.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,12 +48,19 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionResponse>> getTransactions(
+    public ResponseEntity<Page<TransactionResponse>> getTransactions(
             @RequestHeader("X-User-Id") UUID customerId,
-            @PathVariable UUID accountId
+            @PathVariable UUID accountId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate,
+            @RequestParam(required = false) String type
     ) {
-        log.info("GET /api/accounts/{}/transactions — customerId: {}", accountId, customerId);
-        List<TransactionResponse> response = transactionService.getTransactionsByAccountId(accountId, customerId);
+        log.info("GET /api/accounts/{}/transactions/history — customerId: {}", accountId, customerId);
+        Page<TransactionResponse> response = transactionService.getTransactionHistory(
+                accountId, customerId, page, size, startDate, endDate, type
+        );
         return ResponseEntity.ok(response);
     }
 }
