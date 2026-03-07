@@ -240,6 +240,44 @@ docker-compose down        # Detener
 
 ---
 
+## Manejo de Errores
+
+### Respuestas de Error (JSON)
+
+Todos los errores retornan una respuesta estructurada:
+
+```json
+{
+  "timestamp": "2026-03-07T02:00:00.000Z",
+  "status": 404,
+  "error": "Not Found",
+  "message": "No se encontró la cuenta proporcionada",
+  "path": "/api/accounts/{id}"
+}
+```
+
+### Códigos de Estado
+
+| HTTP Status | Escenario |
+|-------------|-----------|
+| 400 Bad Request | Validación de datos fallida, header ausente |
+| 401 Unauthorized | Token JWT ausente o inválido |
+| 403 Forbidden | Token sin customerId válido |
+| 404 Not Found | Cuenta o cliente no encontrado |
+| 409 Conflict | Límite de cuentas alcanzado |
+| 422 Unprocessable Entity | Saldo insuficiente, cliente inactivo |
+| 503 Service Unavailable | ms-customers no disponible (fallback activado) |
+
+### Resiliencia
+
+| Feature | Configuración |
+|---------|---------------|
+| **Feign Fallback** | ms-customers no disponible → mensaje claro al cliente |
+| **Feign Timeout** | Connect: 5s, Read: 10s |
+| **Gateway Timeout** | Connect: 5s, Response: 10s |
+
+---
+
 ## Variables de Entorno
 
 | Variable | Descripción |
@@ -255,7 +293,7 @@ docker-compose down        # Detener
 
 ## Próximos Pasos
 
-1. Completar implementación de `ms-accounts`
-2. Pruebas de integración entre servicios
-3. Implementar circuit breaker (Resilience4j)
-4. Agregar documentación Swagger/OpenAPI
+1. Pruebas de integración entre servicios
+2. Agregar documentación Swagger/OpenAPI
+3. Implementar circuit breaker con Resilience4j (mejora sobre fallback simple)
+4. Agregar logs estructurados con correlación de requests
