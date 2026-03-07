@@ -3,6 +3,7 @@ package es.bytescolab.ms_accounts.config;
 import es.bytescolab.ms_accounts.utils.exception.AccountNotFoundException;
 import es.bytescolab.ms_accounts.utils.exception.CustomerInactiveException;
 import es.bytescolab.ms_accounts.utils.exception.CustomerNotFoundException;
+import es.bytescolab.ms_accounts.utils.exception.ExternalServiceException;
 import es.bytescolab.ms_accounts.utils.exception.InsufficientFundsException;
 import es.bytescolab.ms_accounts.utils.exception.MaxAccountsReachedException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInsufficientFunds(
             InsufficientFundsException ex, HttpServletRequest request) {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ErrorResponse> handleExternalService(
+            ExternalServiceException ex, HttpServletRequest request) {
+        return build(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

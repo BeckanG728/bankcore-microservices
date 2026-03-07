@@ -2,13 +2,18 @@ package es.bytescolab.ms_accounts.feign;
 
 import es.bytescolab.ms_accounts.feign.dto.CustomerResponse;
 import es.bytescolab.ms_accounts.feign.dto.CustomerValidationResponse;
+import es.bytescolab.ms_accounts.feign.fallback.CustomerFeignFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(name = "ms-customers", url = "${customers.service.url}")
+@FeignClient(
+    name = "ms-customers", 
+    url = "${customers.service.url}",
+    fallback = CustomerFeignFallback.class
+)
 public interface CustomerFeignClient {
 
     @GetMapping("/api/customers/{customerId}/validate")

@@ -42,6 +42,14 @@ eureka:
 jwt:
   secret: ${JWT_SECRET:mySecretKeyForJWTGenerationWithMinimumLengthAndStrongRandomCharacters}
 
+# Timeouts para Gateway
+spring:
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
+
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
