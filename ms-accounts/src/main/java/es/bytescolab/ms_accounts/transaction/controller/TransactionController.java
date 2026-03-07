@@ -1,6 +1,7 @@
 package es.bytescolab.ms_accounts.transaction.controller;
 
 import es.bytescolab.ms_accounts.transaction.dto.request.DepositRequest;
+import es.bytescolab.ms_accounts.transaction.dto.request.WithdrawalRequest;
 import es.bytescolab.ms_accounts.transaction.dto.response.TransactionResponse;
 import es.bytescolab.ms_accounts.transaction.services.TransactionService;
 import jakarta.validation.Valid;
@@ -29,6 +30,17 @@ public class TransactionController {
     ) {
         log.info("POST /api/accounts/{}/transactions/deposits — customerId: {}", accountId, customerId);
         TransactionResponse response = transactionService.deposit(accountId, customerId, request.amount(), request.description());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/withdrawals")
+    public ResponseEntity<TransactionResponse> withdraw(
+            @RequestHeader("X-User-Id") UUID customerId,
+            @PathVariable UUID accountId,
+            @Valid @RequestBody WithdrawalRequest request
+    ) {
+        log.info("POST /api/accounts/{}/transactions/withdrawals — customerId: {}", accountId, customerId);
+        TransactionResponse response = transactionService.withdraw(accountId, customerId, request.amount());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

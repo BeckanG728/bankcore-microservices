@@ -10,6 +10,7 @@ import es.bytescolab.ms_accounts.transaction.mapper.TransactionMapper;
 import es.bytescolab.ms_accounts.transaction.repository.TransactionRepository;
 import es.bytescolab.ms_accounts.transaction.services.TransactionService;
 import es.bytescolab.ms_accounts.utils.exception.AccountNotFoundException;
+import es.bytescolab.ms_accounts.utils.exception.InsufficientFundsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,57 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("Transacción de depósito registrada: {}", savedTransaction.getId());
+
+        return transactionMapper.toResponse(savedTransaction);
+    }
+
+    @Override
+    @Transactional
+    public TransactionResponse withdraw(UUID accountId, UUID customerId, BigDecimal amount) {
+        log.info("Retiro solicitado: cuenta={}, cliente={}, monto={}", accountId, customerId, amount);
+
+        // 1. Validar ownership y estado de la cuenta
+        Account account = accountRepository.findByIdAndCustomerId(accountId, customerId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "No se encontró la cuenta proporcionada para este cliente"
+                ));
+
+        if (account.getStatus() != AccountStatus.ACTIVE) {
+            throw new IllegalArgumentException("La cuenta no está activa para realizar retiros");
+        }
+
+        // 2. Validar saldo suficiente
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientFundsException(
+                    "Saldo insuficiente. Saldo disponible: " + account.getBalance()
+            );
+        }
+
+        // 3. Validar límite diario de retiro
+        // TODO: Validar límite acumulado diario (sumar retiros del día actual)
+        BigDecimal dailyLimit = account.getDailyWithdrawalLimit();
+        if (dailyLimit != null && amount.compareTo(dailyLimit) > 0) {
+            throw new IllegalArgumentException(
+                    "El monto supera el límite diario de retiro: " + dailyLimit
+            );
+        }
+
+        // 4. Actualizar saldo
+        BigDecimal newBalance = account.getBalance().subtract(amount);
+        account.setBalance(newBalance);
+        accountRepository.save(account);
+        log.info("Saldo actualizado: {} - {} = {}", account.getBalance().add(amount), amount, newBalance);
+
+        // 5. Registrar transacción
+        Transaction transaction = Transaction.builder()
+                .account(account)
+                .type(TransactionType.WITHDRAWAL)
+                .amount(amount)
+                .description("Retiro de efectivo")
+                .build();
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        log.info("Transacción de retiro registrada: {}", savedTransaction.getId());
 
         return transactionMapper.toResponse(savedTransaction);
     }

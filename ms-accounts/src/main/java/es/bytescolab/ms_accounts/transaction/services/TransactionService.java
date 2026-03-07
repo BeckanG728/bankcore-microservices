@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface TransactionService {
     TransactionResponse deposit(UUID accountId, UUID customerId, BigDecimal amount, String description);
 
+    TransactionResponse withdraw(UUID accountId, UUID customerId, BigDecimal amount);
+
     List<TransactionResponse> getTransactionsByAccountId(UUID accountId, UUID customerId);
 }
